@@ -17,7 +17,7 @@ import pickle
 
 # Caminhos dos arquivos
 MODEL_PATH = 'modelo_clima_joao_pessoa.pkl.gz'
-DATA_PATH = 'dados_clima.csv'
+DATA_PATH = 'dados_capitais.csv'
 
 # Verificar se arquivos existem
 if not os.path.exists(MODEL_PATH):

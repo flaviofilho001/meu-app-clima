@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌤️ Previsão do Tempo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+        }
+        
+        .resultado {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .resultado h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .info-item .label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .info-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .badge.sim {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge.nao {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .descricao {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Previsão do Tempo</h1>
+        
+        <div class="input-group">
+            <label for="data">📅 Escolha a data:</label>
+            <input type="date" id="data" value="2025-10-04">
+        </div>
+        
+        <button onclick="buscarPrevisao()">🔍 Consultar Previsão</button>
+        
+        <div class="loading" id="loading">
+            <p>⏳ Consultando previsão...</p>
+        </div>
+        
+        <div class="resultado" id="resultado">
+            <h2 id="titulo"></h2>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="label">🌡️ Temp. Média</div>
+                    <div class="value" id="tempMedia"></div>
+                </div>
+                <div class="info-item">
+                    <div class="label">🔥 Temp. Máxima</div>
+                    <div class="value" id="tempMax"></div>
+                </div>
+                <div class="info-item">
+                    <div class="label">❄️ Temp. Mínima</div>
+                    <div class="value" id="tempMin"></div>
+                </div>
+                <div class="info-item">
+                    <div class="label">💧 Umidade</div>
+                    <div class="value" id="umidade"></div>
+                </div>
+                <div class="info-item">
+                    <div class="label">🌧️ Precipitação</div>
+                    <div class="value" id="precipitacao"></div>
+                </div>
+                <div class="info-item">
+                    <div class="label">💨 Vento</div>
+                    <div class="value" id="vento"></div>
+                </div>
+            </div>
+            
+            <div class="badges" id="badges"></div>
+            
+            <div class="descricao" id="descricao"></div>
+        </div>
+    </div>
+    
+    <script>
+        async function buscarPrevisao() {
+            const data = document.getElementById('data').value;
+            const loading = document.getElementById('loading');
+            const resultado = document.getElementById('resultado');
+            
+            // Mostrar loading
+            loading.style.display = 'block';
+            resultado.style.display = 'none';
+            
+            try {
+                // Chamar API
+                const response = await fetch('http://localhost:8000/previsao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: data })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar previsão');
+                }
+                
+                const dados = await response.json();
+                
+                // Atualizar interface
+                document.getElementById('titulo').textContent = 
+                    `${dados.cidade} - ${dados.data} (${dados.dia_semana})`;
+                
+                document.getElementById('tempMedia').textContent = `${dados.temperatura_media}°C`;
+                document.getElementById('tempMax').textContent = `${dados.temperatura_maxima}°C`;
+                document.getElementById('tempMin').textContent = `${dados.temperatura_minima}°C`;
+                document.getElementById('umidade').textContent = `${dados.umidade}%`;
+                document.getElementById('precipitacao').textContent = `${dados.precipitacao}mm`;
+                document.getElementById('vento').textContent = `${dados.vento}km/h`;
+                
+                // Badges
+                const badges = document.getElementById('badges');
+                badges.innerHTML = `
+                    <span class="badge ${dados.vai_chover ? 'sim' : 'nao'}">
+                        ${dados.vai_chover ? '☔ Vai chover' : '☀️ Não vai chover'}
+                    </span>
+                    <span class="badge ${dados.dia_quente ? 'sim' : 'nao'}">
+                        ${dados.dia_quente ? '🔥 Quente' : '😊 Normal'}
+                    </span>
+                    <span class="badge ${dados.dia_confortavel ? 'sim' : 'nao'}">
+                        ${dados.dia_confortavel ? '😊 Confortável' : '😐 Desconfortável'}
+                    </span>
+                `;
+                
+                document.getElementById('descricao').textContent = dados.descricao;
+                
+                // Mostrar resultado
+                loading.style.display = 'none';
+                resultado.style.display = 'block';
+                
+            } catch (error) {
+                alert('Erro ao buscar previsão: ' + error.message);
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Definir data de hoje como padrão
+        document.getElementById('data').valueAsDate = new Date();
+    </script>
+</body>
+</html>

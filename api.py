@@ -16,7 +16,7 @@ import pickle
 # =====================================================
 
 # Caminhos dos arquivos
-MODEL_PATH = 'modelo_clima_joao_pessoa.pkl'
+MODEL_PATH = 'modelo_clima_joao_pessoa.pkl.gz'
 DATA_PATH = 'dados_clima.csv'
 
 # Verificar se arquivos existem
